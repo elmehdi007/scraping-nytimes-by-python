@@ -28,7 +28,6 @@ class Scrapper{
 				$links = $dom->getElementsByTagName('a');
 
 				foreach ($links  as $key => $link) {
-					if($key > $this->nbrPageToscrap) break;
 					
 					$tmpPage = $link->getAttribute("href");
 					
