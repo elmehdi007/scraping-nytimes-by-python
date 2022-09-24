@@ -78,7 +78,7 @@ class Scrapper{
 		return $this->emails;
 	}
 
-	protected function clean(string $str) {( !is_string($str) )? '':trim(strtolower($str))}
+	protected function clean(string $str) { !is_string($str) ? $str:trim(strtolower($str));}
 
 	protected function curlGetContents(string $page) {
 		$ch = curl_init($page);
