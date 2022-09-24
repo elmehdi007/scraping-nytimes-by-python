@@ -47,37 +47,44 @@ class Scrapper{
 				}			
 		}
     }
-	
-	
-	public function scrapeEmail() {
-		print "scrapingEmail: <br/>";
+
+	public function getMail():array{
+		return $this->emails;
+	}
+
+	public function scrapeAllData() {
+		print "scrapeAllData function: <br/>";
 		
 		foreach ($this->pages as $key => $page) {
+			$this->scrapeEmail($page);
+
+		}
+	}
+
+	protected function scrapeEmail(string $page) {
 				
-				print "scrapingEmail: ". $page ."<br/>";
-
-				$result = $this->curlGetContents($page);
-					
-				if ($result === FALSE) {return '';}
-					
-				// Convert to lowercase
-				$result = strtolower($result);
-					
-				// Replace EMAIL DOT COM
-				$result = preg_replace('#[(\\[\\<]?AT[)\\]\\>]?\\s*(\\w*)\\s*[(\\[\\<]?DOT[)\\]\\>]?\\s*[a-z]{3}#ms', '@$1.com', $result);
-					
-				// Email matches
-				preg_match_all('#\\b([\\w\\._]*)[\\s(]*@[\\s)]*([\\w_\\-]{3,})\\s*\\.\\s*([a-z]{3})\\b#msi', $result, $matches);
-					
-				$usernames = $matches[1];
-				$accounts = $matches[2];
-				$suffixes = $matches[3];
-
-				for ($i = 0; $i < count($usernames); $i++) {
+		print "scrapingEmail: ". $page ."<br/>";
+		$result = $this->curlGetContents($page);
+			
+		if ($result != FALSE) { 
+			
+			// Convert to lowercase
+			$result = strtolower($result);
+				
+			// Replace EMAIL DOT COM
+			$result = preg_replace('#[(\\[\\<]?AT[)\\]\\>]?\\s*(\\w*)\\s*[(\\[\\<]?DOT[)\\]\\>]?\\s*[a-z]{3}#ms', '@$1.com', $result);
+				
+			// Email matches
+			preg_match_all('#\\b([\\w\\._]*)[\\s(]*@[\\s)]*([\\w_\\-]{3,})\\s*\\.\\s*([a-z]{3})\\b#msi', $result, $matches);
+				
+			$usernames = $matches[1];
+			$accounts = $matches[2];
+			$suffixes = $matches[3];
+			for ($i = 0; $i < count($usernames); $i++) {
 					$tmpMail = $this->formatCleanEmail($usernames[$i], $accounts[$i], $suffixes[$i]);
 					if(!in_array($tmpMail, $this->emails)) $this->emails[$i] = $tmpMail;
-				}
-		} 	
+			}
+		}
 
 		return $this->emails;
 	}
@@ -106,6 +113,7 @@ class Scrapper{
 }
 
 
+$scrapper  = new Scrapper("https://ksoutdoors.com/content/download/47637/485962/version/1/file/Cheyenne+Bottoms+Wildlife+Area+Newsletter+6-29-2016.html");
+$scrapper->scrapeAllData();
+var_dump($scrapper->getMail());
 
-$result = var_dump((new Scrapper("https://ksoutdoors.com/content/download/47637/485962/version/1/file/Cheyenne+Bottoms+Wildlife+Area+Newsletter+6-29-2016.html"))->scrapeEmail());
-//$result = var_dump((new Scrapper("https://www.php.net/manual/en/domdocument.createdocumentfragment.php",true))->scrapeEmail());
