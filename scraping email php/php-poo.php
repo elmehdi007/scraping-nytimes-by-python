@@ -5,6 +5,7 @@ class Scrapper{
 	 protected $webSite;
 	 protected $domain;
 	 protected $emails = [];
+	 protected $phones = [];
 	 protected $pages = [];
 	 protected $srapManyPages;
 	 protected $nbrPageToscrap;
@@ -48,45 +49,102 @@ class Scrapper{
 		}
     }
 
-	public function getMail():array{
+	public function getMails():array{
 		return $this->emails;
 	}
 
+	public function getPhones():array{
+		return $this->phones;
+	}
 	public function scrapeAllData() {
 		print "scrapeAllData function: <br/>";
 		
 		foreach ($this->pages as $key => $page) {
-			$this->scrapeEmail($page);
 
+			$htmlReponse = $this->curlGetContents($this->webSite);
+
+			print "scrapingEmails: ". $page ."<br/>";
+			$this->scrapeEmails($htmlReponse);
+
+			print "scrapingPhones: ". $page ."<br/>";
+			$this->scrapePhones($htmlReponse);
+
+			print "scrapeAdress: ". $page ."<br/>";
+			$this->scrapeAdress($htmlReponse);
 		}
 	}
 
-	protected function scrapeEmail(string $page) {
-				
-		print "scrapingEmail: ". $page ."<br/>";
-		$result = $this->curlGetContents($page);
-			
-		if ($result != FALSE) { 
+	protected function scrapeEmails(string $htmlReponse) {
+							
+		if ($htmlReponse != FALSE) { 
 			
 			// Convert to lowercase
-			$result = strtolower($result);
+			$htmlReponse = strtolower($htmlReponse);
 				
 			// Replace EMAIL DOT COM
-			$result = preg_replace('#[(\\[\\<]?AT[)\\]\\>]?\\s*(\\w*)\\s*[(\\[\\<]?DOT[)\\]\\>]?\\s*[a-z]{3}#ms', '@$1.com', $result);
+			$htmlReponse = preg_replace('#[(\\[\\<]?AT[)\\]\\>]?\\s*(\\w*)\\s*[(\\[\\<]?DOT[)\\]\\>]?\\s*[a-z]{3}#ms', '@$1.com', $htmlReponse);
 				
 			// Email matches
-			preg_match_all('#\\b([\\w\\._]*)[\\s(]*@[\\s)]*([\\w_\\-]{3,})\\s*\\.\\s*([a-z]{3})\\b#msi', $result, $matches);
+			preg_match_all('#\\b([\\w\\._]*)[\\s(]*@[\\s)]*([\\w_\\-]{3,})\\s*\\.\\s*([a-z]{3})\\b#msi', $htmlReponse, $matches);
 				
 			$usernames = $matches[1];
 			$accounts = $matches[2];
 			$suffixes = $matches[3];
 			for ($i = 0; $i < count($usernames); $i++) {
 					$tmpMail = $this->formatCleanEmail($usernames[$i], $accounts[$i], $suffixes[$i]);
-					if(!in_array($tmpMail, $this->emails)) $this->emails[$i] = $tmpMail;
+					
+					if(!in_array($tmpMail, $this->emails) && $tmpMail !="") $this->emails[] = $tmpMail;
 			}
 		}
 
 		return $this->emails;
+	}
+
+	protected function scrapePhones(string $htmlReponse) {
+							
+		if ($htmlReponse != FALSE) { 
+			
+			// Convert to lowercase
+			$htmlReponse = strtolower($htmlReponse);
+				
+			// phone matches
+			//preg_match_all('/^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/', $htmlReponse, $matches);
+			//preg_match_all('\(?([0-9]{3})\s*\)?\s*-?\s*([0-9]{3})\s*-?\s*([0-9]{4})', $htmlReponse, $matches );
+			//preg_match("/[0-9]{10}/", $htmlReponse, $matches);
+			preg_match_all("/[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}/", $htmlReponse, $matches );
+
+			for ($i = 0; $i < count($matches); $i++) {
+					$tmpPhone = $this->clean($matches[$i][0]);
+
+					if(!in_array($tmpPhone, $this->emails) && $tmpPhone!="") $this->phones[] = $tmpPhone;
+			}
+		}
+
+		return $this->phone;
+	}
+
+	protected function scrapeAdress(string $htmlReponse) {
+							
+		if ($htmlReponse != FALSE) { 
+			
+			// Convert to lowercase
+			$htmlReponse = strtolower($htmlReponse);
+				
+			// phone matches
+			//preg_match_all('/^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/', $htmlReponse, $matches);
+			//preg_match_all('\(?([0-9]{3})\s*\)?\s*-?\s*([0-9]{3})\s*-?\s*([0-9]{4})', $htmlReponse, $matches );
+			//preg_match("/[0-9]{10}/", $htmlReponse, $matches);
+			preg_match_all("/\\d+ [a-zA-Z ]+, \\d+ [a-zA-Z ]+, [a-zA-Z ]+/", $htmlReponse, $matches );
+
+			var_dump($matches);die("5555555");
+			for ($i = 0; $i < count($matches); $i++) {
+					$tmpPhone = $this->clean($matches[$i][0]);
+
+					if(!in_array($tmpPhone, $this->emails) && $tmpPhone!="") $this->phones[] = $tmpPhone;
+			}
+		}
+
+		return $this->phone;
 	}
 
 	protected function clean(string $str) { return ( !is_string($str) )? $str:trim(strtolower($str));}
@@ -115,5 +173,6 @@ class Scrapper{
 
 $scrapper  = new Scrapper("https://ksoutdoors.com/content/download/47637/485962/version/1/file/Cheyenne+Bottoms+Wildlife+Area+Newsletter+6-29-2016.html");
 $scrapper->scrapeAllData();
-var_dump($scrapper->getMail());
+var_dump($scrapper->getMails());
+var_dump($scrapper->getPhones());
 
