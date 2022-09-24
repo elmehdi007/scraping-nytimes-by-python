@@ -18,11 +18,10 @@ class Scrapper{
 		$this->webSite = trim($webSite);
 		$this->srapManyPages = $srapManyPages;
 		$this->nbrPageToscrap = $nbrPageToscrap;
-
 		$this->domain = parse_url($this->webSite)['scheme'].'://'.parse_url($this->webSite)['host'];
-
 		$this->pages[] = $this->webSite;
-		if($srapManyPages === true){
+
+		if($this->srapManyPages === true){
 				$dom = new DOMDocument();
 				$result = $this->curlGetContents($this->webSite);
 				@$dom->loadHTML($result);
@@ -54,7 +53,9 @@ class Scrapper{
 		print "scrapingEmail: <br/>";
 		
 		foreach ($this->pages as $key => $page) {
-				//$result = @file_get_contents($page);
+				
+				print "scrapingEmail: ". $page ."<br/>";
+
 				$result = $this->curlGetContents($page);
 					
 				if ($result === FALSE) {return '';}
@@ -76,8 +77,8 @@ class Scrapper{
 					$tmpMail = $this->clean($usernames[$i] . '@' . $accounts[$i] . '.' . $suffixes[$i]);
 					if(!in_array($tmpMail, $this->emails)) $this->emails[$i] = $tmpMail;
 				}
-		} 
-		
+		} 	
+
 		return $this->emails;
 	}
 
@@ -97,6 +98,7 @@ class Scrapper{
 		//$error = curl_error($ch);
 		//$http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 		curl_close($ch);
+
 		return $content;
 	}
 }
