@@ -68,7 +68,7 @@ class Scrapper{
 				$usernames = $matches[1];
 				$accounts = $matches[2];
 				$suffixes = $matches[3];
-				$emails = array();
+
 				for ($i = 0; $i < count($usernames); $i++) {
 					$tmpMail = $this->clean($usernames[$i] . '@' . $accounts[$i] . '.' . $suffixes[$i]);
 					if(!in_array($tmpMail, $this->emails)) $this->emails[$i] = $tmpMail;
