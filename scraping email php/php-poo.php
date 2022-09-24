@@ -175,4 +175,3 @@ $scrapper  = new Scrapper("https://ksoutdoors.com/content/download/47637/485962/
 $scrapper->scrapeAllData();
 var_dump($scrapper->getMails());
 var_dump($scrapper->getPhones());
-
