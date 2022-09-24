@@ -6,22 +6,23 @@ class Scrapper{
 	 protected $domain;
 	 protected $emails = [];
 	 protected $pages = [];
-	 protected $srapAllPages;
+	 protected $srapManyPages;
 	 protected $nbrPageToscrap;
 
-	 function __construct(string $webSite,bool $srapAllPages = false,int $nbrPageToscrap=10) {
+	 //$nbrPageToscrap=0 all infini
+	 function __construct(string $webSite,bool $srapManyPages = false,int $nbrPageToscrap=0) {
         print "construct with url: $webSite <br/>";  
  		
 		if (empty($webSite)) throw new Exception('url should not be empty.');
 		
 		$this->webSite = trim($webSite);
-		$this->srapAllPages = $srapAllPages;
+		$this->srapManyPages = $srapManyPages;
 		$this->nbrPageToscrap = $nbrPageToscrap;
 
 		$this->domain = parse_url($this->webSite)['scheme'].'://'.parse_url($this->webSite)['host'];
 
 		$this->pages[] = $this->webSite;
-		if($srapAllPages === true){
+		if($srapManyPages === true){
 				$dom = new DOMDocument();
 				$result = $this->curlGetContents($this->webSite);
 				@$dom->loadHTML($result);
@@ -29,6 +30,8 @@ class Scrapper{
 
 				foreach ($links  as $key => $link) {
 					
+					if($key >= $this->nbrPageToscrap && $this->nbrPageToscrap>0) break;
+
 					$tmpPage = $link->getAttribute("href");
 					
 					//check link if contains schema or not
@@ -99,5 +102,6 @@ class Scrapper{
 }
 
 
-$result = var_dump((new Scrapper("https://ksoutdoors.com/content/download/47637/485962/version/1/file/Cheyenne+Bottoms+Wildlife+Area+Newsletter+6-29-2016.html"))->scrapeEmail());
+
+//$result = var_dump((new Scrapper("https://ksoutdoors.com/content/download/47637/485962/version/1/file/Cheyenne+Bottoms+Wildlife+Area+Newsletter+6-29-2016.html"))->scrapeEmail());
 //$result = var_dump((new Scrapper("https://www.php.net/manual/en/domdocument.createdocumentfragment.php",true))->scrapeEmail());
