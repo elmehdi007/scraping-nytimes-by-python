@@ -74,7 +74,7 @@ class Scrapper{
 				$suffixes = $matches[3];
 
 				for ($i = 0; $i < count($usernames); $i++) {
-					$tmpMail = $this->clean($usernames[$i] . '@' . $accounts[$i] . '.' . $suffixes[$i]);
+					$tmpMail = $this->formatCleanEmail($usernames[$i], $accounts[$i], $suffixes[$i]);
 					if(!in_array($tmpMail, $this->emails)) $this->emails[$i] = $tmpMail;
 				}
 		} 	
@@ -83,6 +83,8 @@ class Scrapper{
 	}
 
 	protected function clean(string $str) { return ( !is_string($str) )? $str:trim(strtolower($str));}
+
+	protected function formatCleanEmail(string $usernames,string $domainName,string $suffixes) { return $this->clean($usernames) . '@' . $this->clean($domainName) . '.' .$this->clean($suffixes) ;}
 
 	protected function curlGetContents(string $page) {
 		$ch = curl_init($page);
@@ -105,5 +107,5 @@ class Scrapper{
 
 
 
-//$result = var_dump((new Scrapper("https://ksoutdoors.com/content/download/47637/485962/version/1/file/Cheyenne+Bottoms+Wildlife+Area+Newsletter+6-29-2016.html"))->scrapeEmail());
+$result = var_dump((new Scrapper("https://ksoutdoors.com/content/download/47637/485962/version/1/file/Cheyenne+Bottoms+Wildlife+Area+Newsletter+6-29-2016.html"))->scrapeEmail());
 //$result = var_dump((new Scrapper("https://www.php.net/manual/en/domdocument.createdocumentfragment.php",true))->scrapeEmail());
